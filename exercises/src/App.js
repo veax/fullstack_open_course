@@ -3,11 +3,37 @@ import personService from "./PersonService";
 import SearchFilter from "./components/SearchFilter";
 import PersonForm from "./components/PersonForm";
 import Persons from "./components/Persons";
+import Notification from "./components/Notification";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newPerson, setNewPerson] = useState({ name: "", phone: "" });
   const [filterQuery, setFilterQuery] = useState("");
+  const [message, setMessage] = useState(null);
+
+  const popupMessage = () => {
+    setTimeout(() => {
+      setMessage(null);
+    }, 5000);
+  };
+
+  const popupAddPersonMessage = (name) => {
+    let message = {
+      text: `Added ${name}`,
+      type: "success",
+    };
+    setMessage(message);
+    popupMessage();
+  };
+
+  const popupPersonNotExistsError = (name) => {
+    let message = {
+      text: `Information of ${name} has already been removed from server`,
+      type: "error",
+    };
+    setMessage(message);
+    popupMessage();
+  };
 
   useEffect(() => {
     personService.getAllPersons().then((persons) => {
@@ -47,6 +73,11 @@ const App = () => {
               )
             );
             setNewPerson({ name: "", phone: "" });
+            popupAddPersonMessage(changedPerson.name);
+          })
+          .catch((err) => {
+            popupPersonNotExistsError(existingPerson.name);
+            setPersons(persons.filter((p) => p.id !== existingPerson.id));
           });
       } else {
         alert(`${newPerson.name} is already in a phonebook`);
@@ -62,6 +93,7 @@ const App = () => {
     personService.addPerson(person).then((person) => {
       setPersons(persons.concat(person));
       setNewPerson({ name: "", phone: "" });
+      popupAddPersonMessage(person.name);
     });
   };
 
@@ -69,13 +101,18 @@ const App = () => {
     if (window.confirm(`delete ${person.name} ?`)) {
       personService
         .deletePerson(person.id)
-        .then((res) => setPersons(persons.filter((p) => p.id !== person.id)));
+        .then((res) => setPersons(persons.filter((p) => p.id !== person.id)))
+        .catch((err) => {
+          popupPersonNotExistsError(person.name);
+          setPersons(persons.filter((p) => p.id !== person.id));
+        });
     }
   };
 
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={message} />
       <SearchFilter handleSearch={handleSearch} />
       <h4>Add a new:</h4>
       <PersonForm
