@@ -1,11 +1,11 @@
-import React from "react";
+import React from 'react';
 
 const Persons = ({ filteredPersons, handleDeletion }) => (
   <>
     {filteredPersons.map((person) => (
       <div key={person.name}>
         <p>
-          {person.name} {person.phone}
+          {person.name} {person.number}
         </p>
         <button onClick={() => handleDeletion(person)}>delete</button>
       </div>

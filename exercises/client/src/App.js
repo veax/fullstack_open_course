@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from "react";
-import personService from "./PersonService";
-import SearchFilter from "./components/SearchFilter";
-import PersonForm from "./components/PersonForm";
-import Persons from "./components/Persons";
-import Notification from "./components/Notification";
+import React, { useState, useEffect } from 'react';
+import personService from './PersonService';
+import SearchFilter from './components/SearchFilter';
+import PersonForm from './components/PersonForm';
+import Persons from './components/Persons';
+import Notification from './components/Notification';
 
 const App = () => {
   const [persons, setPersons] = useState([]);
-  const [newPerson, setNewPerson] = useState({ name: "", phone: "" });
-  const [filterQuery, setFilterQuery] = useState("");
+  const [newPerson, setNewPerson] = useState({ name: '', number: '' });
+  const [filterQuery, setFilterQuery] = useState('');
   const [message, setMessage] = useState(null);
 
   const popupMessage = () => {
@@ -20,7 +20,7 @@ const App = () => {
   const popupAddPersonMessage = (name) => {
     let message = {
       text: `Added ${name}`,
-      type: "success",
+      type: 'success',
     };
     setMessage(message);
     popupMessage();
@@ -29,21 +29,20 @@ const App = () => {
   const popupPersonNotExistsError = (name) => {
     let message = {
       text: `Information of ${name} has already been removed from server`,
-      type: "error",
+      type: 'error',
     };
     setMessage(message);
     popupMessage();
   };
 
   useEffect(() => {
+    console.log('use effect called');
     personService.getAllPersons().then((persons) => {
       setPersons(persons);
     });
   }, []);
 
-  const filteredPersons = persons.filter((p) =>
-    p.name.toLowerCase().includes(filterQuery)
-  );
+  const filteredPersons = persons.filter((p) => p.name.toLowerCase().includes(filterQuery));
 
   const handleSearch = (e) => {
     setFilterQuery(e.target.value.toLowerCase());
@@ -59,20 +58,16 @@ const App = () => {
     let existingPerson = persons.find((p) => p.name === newPerson.name);
     if (existingPerson) {
       if (
-        existingPerson.phone !== newPerson.phone &&
+        existingPerson.number !== newPerson.number &&
         window.confirm(
-          `${newPerson.name} is already added to phonebook, replace the old number with a new one ?`
+          `${newPerson.name} is already added to phonebook, replace the old number with a new one ?`,
         )
       ) {
         personService
           .updatePerson(existingPerson.id, newPerson)
           .then((changedPerson) => {
-            setPersons(
-              persons.map((p) =>
-                p.id !== changedPerson.id ? p : changedPerson
-              )
-            );
-            setNewPerson({ name: "", phone: "" });
+            setPersons(persons.map((p) => (p.id !== changedPerson.id ? p : changedPerson)));
+            setNewPerson({ name: '', number: '' });
             popupAddPersonMessage(changedPerson.name);
           })
           .catch((err) => {
@@ -87,12 +82,13 @@ const App = () => {
 
     const person = {
       name: newPerson.name,
-      phone: newPerson.phone,
+      number: newPerson.number,
     };
-    setPersons(persons.concat(person));
+
     personService.addPerson(person).then((person) => {
       setPersons(persons.concat(person));
-      setNewPerson({ name: "", phone: "" });
+      console.log('person added');
+      setNewPerson({ name: '', number: '' });
       popupAddPersonMessage(person.name);
     });
   };
@@ -115,16 +111,9 @@ const App = () => {
       <Notification message={message} />
       <SearchFilter handleSearch={handleSearch} />
       <h4>Add a new:</h4>
-      <PersonForm
-        addPerson={addPerson}
-        handlePersonInput={handlePersonInput}
-        person={newPerson}
-      />
-      <h2>Numbers</h2>
-      <Persons
-        filteredPersons={filteredPersons}
-        handleDeletion={handleDeletion}
-      />
+      <PersonForm addPerson={addPerson} handlePersonInput={handlePersonInput} person={newPerson} />
+      <h2>Phones</h2>
+      <Persons filteredPersons={filteredPersons} handleDeletion={handleDeletion} />
     </div>
   );
 };
