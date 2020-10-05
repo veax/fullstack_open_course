@@ -36,7 +36,6 @@ const App = () => {
   };
 
   useEffect(() => {
-    console.log('use effect called');
     personService.getAllPersons().then((persons) => {
       setPersons(persons);
     });
@@ -58,7 +57,7 @@ const App = () => {
     let existingPerson = persons.find((p) => p.name === newPerson.name);
     if (existingPerson) {
       if (
-        existingPerson.number !== newPerson.number &&
+        existingPerson.number != newPerson.number &&
         window.confirm(
           `${newPerson.name} is already added to phonebook, replace the old number with a new one ?`,
         )
